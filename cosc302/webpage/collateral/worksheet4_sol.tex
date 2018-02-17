@@ -1,0 +1,263 @@
+\documentclass[letterpaper,11pt]{article}
+
+\newif\ifSolutions
+%\Solutionsfalse
+\Solutionstrue
+
+
+\usepackage[margin=1.0in]{geometry}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amsfonts}
+
+%\newtheorem{theorem}{Theorem}[section]
+\newtheorem{invariant}{Invariant}
+
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\lhead{COSC 302 Lecture --- {\bf Worksheet 4: Divide and Conquer II (solutions)} --- Spring 2018}
+\rhead{}
+
+\usepackage[noend]{algpseudocode}
+\usepackage{algorithm}
+
+\algrenewcommand\algorithmicdo{}
+\algrenewcommand{\algorithmiccomment}[1]{// #1}
+
+\newcommand{\midd}{\ensuremath{\mathrm{mid}}}
+\newcommand{\E}{\ensuremath{\mathrm{E}}}
+\newcommand{\Prob}{\ensuremath{\mathrm{Pr}}}
+\newcommand{\argmin}{\ensuremath{\mathrm{arg\,min}}}
+\newcommand{\argmax}{\ensuremath{\mathrm{arg\,max}}}
+
+\begin{document}
+\thispagestyle{plain}
+\noindent{COSC 302: Analysis of Algorithms Lecture --- Spring 2018}
+
+\noindent{Prof. Darren Strash}
+
+\noindent{Colgate University} \\
+
+\noindent{\bf Worksheet 4 --- Divide and Conquer II and Average-Case Analysis (with solutions)} \\
+
+\begin{enumerate}
+\item You are again hard at work doing quality assurance testing at the pinePhone factory. Suppose you now have two pinePhones. Can you find the highest safe rung by dropping the pinePhones asymptotically fewer times than $\Theta(n)$ (the number of drops for 1 pinePhone)? How many drops do you make with your algorithm in the worst case?\\
+
+\ifSolutions
+We can decompose the ladder into $\sqrt{n}$ sections, each of which has $\sqrt{n}$ rungs. We drop the first pinePhone from the bottommost rung, then drop from rungs $i\sqrt{n}$ for $i=1,2,3,\ldots \sqrt{n}$ until the pinePhone breaks. When it breaks, we are guaranteed that highest safe rung is within the $\sqrt{n}$ rungs below where the first pinePhone broke. We then test each one of the rungs from bottom to top using the iterative algorithm for one pinePhone. In total, we perform $2\sqrt{n}-1=\Theta(\sqrt{n})$ drops in the worst case.
+\else
+\vspace*{6cm}
+\fi{}
+
+\item Suppose you are given $n$ numbers in an array $A$, divided into $\left\lceil n/\lg n \right\rceil$ equal-sized buckets $A_1,A_2,\ldots A_{\left\lceil n/\lg n\right\rceil}$, which are stored in order in an array. Further suppose that $\forall a\in A_i$, $\forall b\in A_{i+1}$, $a<b$, but we do not know the order of elements in the same bucket $A_i$. How fast can you search for a given element in the collection?
+
+\ifSolutions
+It is possible to perform a binary search over the buckets in time $O(\lg n)$, which narrows the search to a constant number of buckets. From which we can perform a linear search in time $O(n/\left\lceil n/\lg n\right\rceil) = O(\lg n)$. See Algorithm~\ref{alg:bucket-search}.
+
+\newcommand{\bo}{\text{bucket-size}}
+\newcommand{\be}{\text{bucket-element-index}}
+\newcommand{\bn}{\text{mid-bucket}}
+\begin{algorithm}[!h]
+\textsc{Bucket-Search}($A[1..n]$, $k$)
+\begin{algorithmic}[1]
+\State $p = 1$ \Comment{First bucket}
+\State $r = \lceil n/\lg n\rceil$ \Comment{Last bucket}
+\State $\bo = n/\lceil n/\lg n\rceil$
+\While{$r - p > 1$}
+\State $\bn = \lfloor \frac{r+p}{2}\rfloor$
+\State $\be = \bn \cdot \bo$ \Comment{Last element in \bn}
+\If{$A[\be] < k$}
+\State $p = \bn$
+\ElsIf{$A[\be] > k$}
+\State $r = \bn$
+\Else
+\State \Return {\textbf{true}} \Comment{Found $k$ in bucket $\bn$}
+\EndIf
+\EndWhile
+\State
+\Comment{Search through remaining values in buckets $p$ and $r$}
+\State$\text{found-k}$ = \textsc{Linear-Search}($A$, $(p-1)\cdot \bo + 1$, $r\cdot \bo$)
+\State\Return $\text{found-k}$
+\end{algorithmic}
+\label{alg:bucket-search}
+\end{algorithm}
+
+\vfill{}
+\hfill{}Solution continued on next page $\rightarrow$
+
+\newpage
+
+Correctness of this algorithm is based on the following loop invariant:
+
+\begin{invariant}
+At the beginning of the while loop on line 2, $k$ is either not in $A$, or $k$ is in buckets $p...r$ (in subarray $A[(p-1)\cdot \bo + 1\ldots r\cdot \bo]$).
+\end{invariant}
+
+\textbf{Initialization:} Either $k$ is in the $A[1..n]$ or it isn't. This is always true.
+
+\textbf{Maintenance:} We assume that $k$ is in $A$, otherwise $k$ is never in the range and the invariant is trivially true. We therefore show maintenance for the case that $k$ is in the array. At the beginning of the while loop. Then at the beginning of the loop $k$ is in the range buckets $p$ to $r$ (stored in $A[(p-1)\cdot \bo + 1\ldots r\cdot \bo]$). After comparing an element from bucket $\bn$, then $k$ is either in the current bucket or it is to the right or left. Without loss of generality, suppose the element compared from bucket $\bn$ is less than $k$. Then $k$ cannot be in buckets $\bn + 1$ to $r$, since these contain values that are strictly greater than $k$. Therefore, $k$ must be in buckets $p$ to $\bn$. Since $r=\bn$ in the next loop, $k$ is in buckets $p..r$ (stored in subarray $A[(p-1)\cdot \bo + 1\ldots r\cdot \bo]$).
+
+\textbf{Termination:} The loop either terminates at line 12, in which case $k$ is found, or on line 15, in which case the value $k$ is in the range (by the invariant) (and found on line 14) or not in the array and therefore is not found on line 14.
+\else
+\newpage
+\fi{} %Solutions
+
+\item\begin{enumerate}
+\item Suppose you are given an array $A[1..n]$ with $3$ inversions. Can you sort $A$ asymptotically faster than $\Theta(n\lg n)$ using a comparison sort? If so, describe an algorithm.\\
+
+{\bf Solution:} Yes, running insertion sort on the data will take $\Theta(n)$ time in the worst case. $\Theta(n)$ time to first look at each element and decide if that element is in order and $\Theta(1)$ time to test and swap the elements involved in each inversion.\\
+
+\item Suppose you change the base case of merge sort to run insertion sort when the array contains 10 or fewer elements. Does the asymptotic running time of merge sort change? \emph{Hint: Come up with a recurrence, and solve it.} \\
+
+{\bf Solution:} The asymptotic running time does not change, it is still $\Theta(n\lg n)$ in the worst case. We can see this in several ways. First: Running merge sort on a data set of size 10 takes time $\Theta(10\lg 10)=\Theta(1)$ time. Running insertion sort on the same data takes $\Theta(10^2)=\Theta(1)$ time. Therefore, changing one for the other in merge sort only changes constant factors. Second: Look at the recursion tree. By stopping recursion when each subarray has 10 elements, we are only removing $\lg 10$ levels from the recursion tree. The recursion tree then has depth $\Theta(\lg n -\lg 10) = \Theta(\lg n)$. We are still doing a linear number of operations for each level in the recursion tree, taking $\Theta(n\lg n)$ time overall.
+
+\item Define a \emph{crossing} inversion to be the number of inversions between the left and right halves of an array. That is, given an array $A[1..n]$, crossing inversions only count inversions formed between indices $i$ and $j$, where $i \in \{1,2,\ldots,n/2\}$, and $j \in \{n/2+1,\ldots,n\}.$ 
+\begin{enumerate}
+\item How fast can you sort an array $A[1..n]$ that has \emph{only} crossing inversions and no other inversions? Describe an algorithm to sort with this running time.\\
+
+\textbf{Solution:} Since there are only inversions between the two halves, both the left and the right halves are themselves sorted. This is precisely the situation where we merge in merge sort. We can thus sort in worst-case $\Theta(n)$ time by merging the two halves of $A$ into a new array $B$, then copying $B$ back into $A$. \\
+
+\item Suppose that you are designing an algorithm to count the number of crossing inversions. You decide to use merge sort as a template, but you will only count the number of crossing inversions in each subarray---instead of merging or sorting. Consider the following questions:
+\begin{enumerate}
+\item Suppose that, for each recursive call of your merge-sort-like algorithm, its subarray $A[i..j]$ has $1$ crossing inversion. Give an example input with $8$ elements where this is the case. Under this restriction, how many \emph{total} inversions will an $n$-element input array have?\\
+
+\textbf{Solution:}
+\begin{center}
+[2,0,4,1,6,3,7,5]
+\end{center}
+
+The total number of inversions $T$ is equal to the number of crossing inversions $C$ over all these subarrays. This can be seen by a two-part proof.
+\begin{proof} 
+We show that $T\geq C$ and $T\leq C$. If both of these inequalities hold, then $T=C$, as $T$ cannot be simultaneously smaller \emph{and} larger than $C$.
+
+\emph{Case 1:} $T\geq C$\\
+
+Notice that each crossing inversion, counted in $C$, is itself an inversion. Therefore, each such crossing inversion is counted in the total number of inversions, and therefore $T\geq C$.\\
+
+\emph{Case 2:} $T\leq C$\\
+
+We show that an arbitrary inversion (which is counted in $T$) is counted in $C$. Let the pair of indices $(i,j)$ be some inversion. Since we are recursively subdividing the array $A$ until it reaches subarrays of single elements, there are two consecutive levels $k$ and $k+1$ in the recursion tree, where indices $i$ and $j$ are in the same subarray at level $k$, and then in two different subarrays at level $k+1$. At level $k$, when they are part of the same subarray, $(i,j)$ is a crossing inversion, as $i$ is in the first half of the subarray, and $j$ is in the second half.
+\end{proof}
+
+Further, there is a linear number of such inversions:
+\[\sum_{i=0}^{\lg n - 1}2^i = 2^{\lg n} - 1 = n-1.\]
+Which is derived by looking at the recursion tree for merge sort, and adding up the crossing edges at each level---and noticing that the last level, which only has subarrays of size $1$ contains no crossing edges. 
+
+\newpage
+
+\item Suppose you are given an $n$-element input array with the properties described in A. Can you make simple adjustments to merge sort to sort such an input array asymptotically faster than $\Theta(n\lg n)$? \emph{Hint: given a subarray with 1 inversion, where can the inverted elements be in the subarray?}\\
+
+\textbf{Solution:} Note that it is possible to sort in linear time with insertion sort, but now we can also do linear time sorting with merge sort. Instead of doing a full merge step, it is sufficient to swap the elements within $1$ index from the middle. We maintain the invariant that after returning from a recursive call, the crossing inversion can only be between these two elements. Then, in order to sort, we swap these elements in the combine step. This takes constant time to sort each subarray. Thus, we get the recurrence $T(n) = 2T(n/2) + \Theta(1)$, which solves to $T(n) = \Theta(n)$.
+\end{enumerate}
+\end{enumerate}
+\end{enumerate}
+
+\newpage
+\item Suppose you are given an array $A[1..n]$ of distinct integers in the range $a..b$ (inclusive). We say that an integer is \emph{missing} from $A$ if it is in the range $a..b$ and not present in array $A$. %Note that the only way this can happen is if $n$ is \emph{smaller} than the number of integers in the range $a..b$.
+
+\begin{enumerate}
+\item Give pseudocode for a worst-case $O(1)$-time algorithm to determine how many integers in $a..b$ are missing from $A$.
+
+\ifSolutions
+\textbf{Solution:}
+
+\begin{center}
+\begin{algorithm}[!h]
+\textsc{NumMissing}($A$, $a$, $b$)
+\begin{algorithmic}[1]
+\State\Comment{number of elements between $a$ and $b$ inclusive,}
+\State\Comment{minus the number of elements present in $A$}
+\State \Return{$b-a+1 - A$.length}
+\end{algorithmic}
+\label{algorithm:num-missing}
+\end{algorithm}
+\end{center}
+\else
+\vspace*{4cm}
+\fi{} %Solutions
+
+\item Briefly describe, and give pseudocode for, an efficient algorithm to compute the smallest integer missing from $A$. \emph{Hint: Your algorithm should have worst-case running time $O(n)$.} \\
+
+\textbf{Solution:} First note that it would be simple to solve the problem if the input array was first sorted. Thus there is a simple $\Theta(n\lg n)$ time algorithm: sort the array, then iterate through and check for the first value missing (either $a$ is missing, or find the first value such that $x$ is present, but $x+1$ is not).\\
+
+However, since sorting in linear-time is prohibited by the problem, let's try to solve using a divide and conquer strategy. In particular, if we could divide the array in half and recursive on one of the halves, then we would get a recurrence
+\[T(n) \leq T(n/2) + \Theta(n)\]
+for the running time, which solves to $O(n)$.\\
+
+Using linear-time selection as a tool, we can compute the median element (at index $n/2$) in $A$ by calling \textsc{Select}($A$, $1$, $n$, $n/2$). We can then partition $A$ on this element and if the left half is missing an element, recurse on it. If the left half is not missing an element, but the right half is missing an element,  then we recurse on the right half. We do this until we are left with a constant number of elements, which can be checked in constant time. See rough pseudocode on next page.
+
+\vfill{}
+\hfill{}Continued on next page $\rightarrow$
+\newpage
+
+\begin{center}
+\begin{algorithm}[!h]
+\textsc{SmallestMissing}($A$, $p$, $r$, $a$, $b$)
+\begin{algorithmic}[1]
+\State numleft $ = p-r+1$
+\State\Comment{If the number left is constant, check if $a$, $a+1$, $\ldots$ are present, and return smallest}
+\If{numleft $\leq 3$}
+    \For{$i = 0$ \text{to} $\text{numleft}$}
+        \If{$(a + i)\not\in A[p..r]$}
+            \State\Return{$(a+i)$}
+        \EndIf
+    \EndFor
+\EndIf
+\State
+\State\Comment{Otherwise, we need to divide and conquer.}
+\State pivot $=$ \textsc{Select}($A$, $p$, $r$, $(p+r)/2$) \Comment{Get median element between indices $p$ and $r$}
+\State swap pivot $\leftrightarrow A[r]$
+\State $q =$ \textsc{Partition}($A$, $p$, $r$)
+\If{\textsc{NumMissing}($A[p..q]$, $a$, pivot) $\geq 1$} \Comment{Recurse on left half}
+\State\Return{\textsc{SmallestMissing}($A$, $p$, $q$, $a$, pivot)}
+\Else \Comment{Recurse on left half}
+\State\Return{\textsc{SmallestMissing}($A$, $q$, $r$, pivot, $b$)}
+\EndIf
+\label{algorithm:smallest-missing}
+\end{algorithmic}
+\end{algorithm}
+\end{center}
+
+\noindent The final solution is found by calling \textsc{SmallestMissing}($A$, $1$, $n$, $a$, $b$).
+
+\end{enumerate}
+
+\newpage
+\item Iterated functions and the tower of twos.\\
+
+(to be discussed in a future recitation.)\\
+
+
+\item \emph{(Rolling a fair die)}
+\begin{enumerate}
+\item What is the expected value of rolling a fair die one time?\\
+
+\textbf{Solution:} The sample space of a die is $\{1,2,3,4,5,6\}$, and since the die is fair, the probability of getting a given value is equal, $1/6$.\\
+
+Let $X$ be the value of rolling a die, then the expected value of $X$ is
+\[\E[X]= \sum_{D=1}^{6}D\cdot\Prob\{X = D\} = \sum_{D=1}^{6}\frac{D}{6} = \frac{1}{6}\sum_{D=1}^{6}D = \frac{1}{6}\cdot\frac{6(6+1)}{2} = \frac{7}{2} = 3.5.\]
+\item Compute the expected number of $3$'s you get when rolling a fair die one time. Be sure to use an indicator random variable.\\
+
+Since we want to count the number of $3$'s, we need an indicator that counts $1$ if we get a $3$, and $0$ otherwise. Let $D$ be the value of rolling a die. Then we create an indicator random variable $X_D$ as follows.
+\[X_D = I\{D=3\} = \begin{cases}1& D = 3,\\0& \text{otherwise.}\end{cases}\]
+
+Let $X$ be the number of 3's rolled. Then the \emph{exact} number of times a 3 is rolled is
+\[X = X_D.\]
+We compute the expected value of $X$ as
+\[\E[X] = \E[X_D] = \sum_{i=1}^{6}X_i\cdot\Prob\{D = i\} = 1\cdot\Prob\{D = 3\} = \frac{1}{6}.\]
+\end{enumerate}
+\newpage
+\item \emph{(Sometimes insertion sort)} You believe that you can devise a randomized sorting algorithm that has expected-time $\Theta(n\lg n)$ by randomly selecting whether or not to run insertion sort on the input array $A[1..n]$.
+\begin{enumerate}
+\item Suppose you you design an algorithm that, with probability $1/2$, calls merge sort, and with probability $1/2$, calls insertion sort. Compute the expected running time of your algorithm. \\
+
+(to be discussed in a future recitation.)\\
+
+\item What if the probabilities change to $\frac{n-\lg n}{n}$ for merge sort, and $\frac{\lg n}{n}$ for insertion sort?\\
+
+(to be discussed in a future recitation.)\\
+\end{enumerate}
+
+\end{enumerate}
+\end{document}
+
