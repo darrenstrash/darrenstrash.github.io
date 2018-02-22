@@ -1,0 +1,173 @@
+\documentclass[letterpaper,11pt]{article}
+
+\usepackage{fullpage}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{hyperref}
+
+\newtheorem{theorem}{Theorem}[section]
+
+\begin{document}
+\noindent{COSC 302: Analysis of Algorithms --- Spring 2018}
+
+\noindent{Prof. Darren Strash}
+
+\noindent{Colgate University} \\
+
+\noindent{\bf Problem Set 3 --- Solving Recurrences and Divide and Conquer I} \\
+
+\noindent {\bf Due by 4:30pm Friday, Feb. 16, 2018 as a single pdf via Moodle (either generated via \LaTeX{}, or concatenated photos of your work). Late assignments are not accepted.} \\
+
+This is an \emph{individual} assignment: collaboration (such as discussing problems and brainstorming ideas for solving them) on this assignment is highly encouraged, but the work you submit must be your own. Give information only as a tutor would: ask questions so that your classmate is able to figure out the answer for themselves. It is unacceptable to share any artifacts, such as code and/or write-ups for this assignment. If you work with someone in close collaboration, you must mention your collaborator on your assignment.
+
+\emph{Suggested practice problems (not to be turned in): 4.3-1, 4.3-8, 4.4-2, 4.4-4, 4.4-6, 4-3}
+
+\begin{enumerate}
+\item Problem 4-1 from CLRS 3rd edition.\\
+
+Give tight upper and lower bounds for the following recurrences.
+
+\textbf{Solutions:}
+\begin{enumerate}
+\item $T(n) = 2T(n/2) + n^4$.\\
+
+By case 3 of the Master Theorem $T(n) = \Theta(n^4)$.
+
+$n^{\log_ba} = n^{\log_22} = n$ and $f(n) = n^4 = \Omega(n^{1 + \epsilon})$ for $0 < \epsilon \leq 3$. Furthermore, $f(n)$ satisfies the regularity condition with $c=1/8$, since $2f(n/2) =  2\left(\frac{n}{2}\right)^4 = (1/8)n^4 \leq (1/8)f(n)$.
+
+
+\item $T(n) = T(7n/10) + n$.\\
+
+By case 3 of the Master Theorem $T(n) = \Theta(n)$. 
+
+$n^{\log_ba} = n^{\log_{10/7}1} = n^0 = 1$ and $f(n) = n = \Omega(n^{0 + \epsilon})$ for $0 < \epsilon \leq 1$. Furthermore, $f(n)$ satisfies the regularity condition with $c=7/10$, since $1f(n/{10/7}) = n \leq 7/10n\leq 7/10f(n)$.
+
+
+\item $T(n) = 16T(n/4) + n^2$.\\
+
+By case 2 of the Master Theorem $T(n) = \Theta(n^2\lg n)$.
+
+$n^{\log_ba} = n^{\log_{4}16} = n^2$ and $f(n) = n^2 = \Theta(n^2)$.
+
+\item $T(n) = 7T(n/3) + n^2$.\\
+
+By case 3 of the Master Theorem $T(n) = \Theta(n^2)$.
+
+$n^{\log_ba} = n^{\log_{3}7}$ and $f(n) = n^2 = \Omega(n^{\log_37+\epsilon})$ for $0 < \epsilon \leq 2 - \lg_37$.
+
+\vfill{}
+\hfill{}See next page for finished solution $\rightarrow$
+\newpage
+
+\item $T(n) = 7T(n/2) + n^2$.\\
+
+By case 1 of the Master Theorem $T(n) = \Theta(n^{\log_27})$.
+
+$n^{\log_ba} = n^{\log_{2}7}$ and $f(n) = n^2 = O(n^{\log_27-\epsilon})$ for $0 < \epsilon \leq \lg_27 - 2$.
+
+\item $T(n) = 2T(n/4) = \sqrt{n}$.\\
+
+By case 2 of the Master Theorem $T(n) = \Theta(\sqrt{n}\lg n)$.
+
+$n^{\log_ba} = n^{\log_{4}2} = \sqrt{n}$ and $f(n) = \sqrt{n} = \Theta(\sqrt{n})$.
+
+\item $T(n) = T(n-2) + n^2$.\\
+
+We show that $T(n) = \Theta(n^3)$ via the direct method.
+\begin{proof}
+\begin{align*}
+T(n) &= T(n-2) + n^2\\
+     &= T(n-4) + (n-2)^2 + n^2\\
+     &= T(n-6) + (n-4)^2 + (n-2)^2 + n^2\\
+     &= T(n-2(i+1)) + (n-2i)^2 + \cdots + n^2\\
+     &= \Theta(1) + \sum_{i=0}^{n/2-1}(n-2i)^2\\
+     &= \Theta(1) + \sum_{i=0}^{n/2-1}(n^2 - 4ni + 4i^2)\\
+     &= \Theta(1) + \sum_{i=0}^{n/2-1}n^2 - \sum_{i=0}^{n/2-1}4ni + 4\sum_{i=0}^{n/2-1}4i^2\\
+     &=\Theta(1) + n^3/2 - 4n\frac{(n/2-1)(n/2)}{2} + 4\frac{(n/2)(n/2 - 1)(n-1)}{6}\\
+     &=\Theta(1) + n^3/2 - n^3/2 - \Theta(n^2) + n^3/6 + \Theta(n^2)\\
+     &=\Theta(n^3).
+\end{align*}%
+\end{proof}
+
+\end{enumerate}
+
+\newpage
+
+\item Using one of the methods discussed in lecture, give a tight asymptotic bound for the recurrence $T(n) = 8T(n/2) + n^3 \lg n$.\\
+
+{\bf Solution:} As a first try, we can attempt to apply the master method. Unfortunately, it does not apply. Case 3 is the closest, but $n^3\lg n \neq \Omega(n^{3+\epsilon})$, since $\lg n \leq n^\epsilon$ for any constant $\epsilon > 0$.
+
+We prove that $T(n) = \Theta(n^3\lg^2 n)$ using the direct method.
+\begin{proof}
+By the proof of the master theorem, we have the \[T(n) = \Theta(n^{\log_b a}) + \sum_{i=0}^{\log_b n-1}a^if(n/b^i),\]
+which applies regardless of $f(n)$. Substituting in for $a,b$, $f(n)$, we have that 
+
+\vfill{}
+\hfill{}See next page for finished proof $\rightarrow$
+
+\begin{align*}
+T(n) &= \Theta(n^{\log_b a}) + \sum_{i=0}^{\log_b n-1}a^if(n/b^i)\\
+     &= \Theta(n^{\log_2 8}) + \sum_{i=0}^{\lg n-1}{8}^if(n/2^i)\\
+     &= \Theta(n^3) + \sum_{i=0}^{\lg n-1}{8}^i\left(\frac{n}{2^i}\right)^3\lg(n/2^i)\\
+     &= \Theta(n^3) + \sum_{i=0}^{\lg n-1}{8}^i\left(\frac{n^3}{8^i}\right)\lg(n/2^i)\\
+     &= \Theta(n^3) + \sum_{i=0}^{\lg n-1}n^3\lg(n/2^i)&\text{(stop here for $T(n) = O(n^3\lg^2 n)$)}\\
+     &= \Theta(n^3) + \sum_{i=0}^{\lg n-1}n^3(\lg n - \lg 2^i)\\
+     &= \Theta(n^3) + \sum_{i=0}^{\lg n-1}n^3(\lg n - i\lg 2)\\
+     &= \Theta(n^3) + \sum_{i=0}^{\lg n-1}(n^3\lg n - n^3i)\\
+     &= \Theta(n^3) + \sum_{i=0}^{\lg n-1}n^3\lg n - \sum_{i=0}^{\lg n-1}n^3i\\
+     &= \Theta(n^3) + n^3\lg n\sum_{i=0}^{\lg n-1}1 - n^3\sum_{i=0}^{\lg n-1}i\\
+     &= \Theta(n^3) + n^3\lg n\lg n - n^3\frac{(\lg n-1)\lg n}{2}\\
+     &= \Theta(n^3) + n^3\lg n\left(\lg n - \frac{1}{2}(\lg n - 1)\right)\\
+     &= \Theta(n^3) + n^3\lg n\left(\frac{1}{2}\lg n + \frac{1}{2}\right)\\
+     &= \Theta(n^3\lg^2 n).
+\end{align*}
+\end{proof}
+
+
+\newpage
+
+\item Problem 4.3-9 from CLRS 3rd edition.\\
+
+Solve $T(n) = 3T(\sqrt{n}) +\log n$ by change of variables. Do not worry about whether values are integral.\\
+
+\textbf{Solution:}
+
+We let $n = 10^m$, and note that $m = \log n$. \emph{(Note that we can also use $n = 2^m$ and get the same solution.)} Then we have that
+\[T(10^m) = 3T(\sqrt{10^{m}}) + \log 10^m = 3T(10^{m/2}) + m.\]
+Notice that $T(10^m)$ is just a function of $m$. Let's rename it $S(m)$. Then,
+\[S(m) = 3S(m/2) + m,\]
+which can be solved using case 1 of the master theorem.
+In this case $a=3$, $b=2$, and $f(m) = m$, and $m = O(m^{\log_2{3}-\epsilon})$ for any $0 < \epsilon \leq \log_23 - 1$.
+
+Therefore, $S(m) = \Theta(m^{\log_23})$, and since $m = \log n$, we have that
+\[T(n) = T(10^m) = S(m) = \Theta(m^{\log_23}) = \Theta((\log n)^{\log_23}).\]
+
+
+\newpage
+\item \emph{Revisiting the pinePhone}. You are still hard at work testing the quality of pinePhones for Pineapple.
+
+\begin{enumerate}
+\item Suppose now that you are given $3$ pinePhones. Present a strategy to find the highest safe rung with $\Theta(\sqrt[3]{n})$ pinePhone drops.\\[-8pt]
+
+\textbf{Solution:} Section the ladder into $\sqrt[3]{n}$ sections, each with $n^{2/3}$ rungs. We drop the first phone every $n^{2/3}$ rungs until it breaks. We then need to find the highest safe rung in the previous section of $n^{2/3}$ rungs. For this, we use our strategy with $2$ phones, which performs $\Theta(\sqrt{n}$ pinePhone drops on $n$ rungs. However, we perform this on a section with $n^{2/3}$ rungs, therefore performing $\Theta(\sqrt{n^{2/3}})$ pinePhone drops, which is $\Theta(\sqrt[3]{n})$. We drop the first phone $\sqrt[3]{n}$ times, the remaining phones $\Theta(\sqrt[3]{n})$ times, for a total of $\Theta(\sqrt[3]{n})$ pinePhone drops.\\[-8pt]
+
+\item Now show that you can find the highest safe rung with $4$ pinePhones with $\Theta(\sqrt[4]{n})$ pinePhone drops.\\[-8pt]
+
+\textbf{Solution:} Section the ladder into $\sqrt[4]{n}$ sections, each with $n^{3/4}$ rungs. We drop the first phone every $n^{3/4}$ rungs until it breaks. We then use our strategy for $3$ phones on the previous section of $n^{3/4}$ rungs. We therefore drop the remaining $3$ phones a total of $\Theta(\sqrt[3]{n^{3/4}}) = \Theta(\sqrt[4]{n})$ times. The total number of drops is therefore $\Theta(\sqrt[4]{n})$.\\[-8pt]
+
+\item Suppose you continue your strategy to $k$ pinePhones: Define the number of pinePhone drops as a recurrence in terms of $n$, the number of rungs on the ladder, and $k$, the number of pinePhones you are given. \emph{Hint:} Make sure to give at least one base case. Do you need multiple base cases?\\[-8pt]
+
+\textbf{Solution:} Let $P(n,k)$ be the worst-case number of pinePhone drops on $n$ rungs, with $k$ pinePhones. Note that when we have $1$ pinePhone, we use a linear strategy, performing $n$ drops in the worst case. Following the pattern for $2$, $3$, and $4$ pinePhones, when we increase the number of phones to $k$, we section the rungs into $\sqrt[k]{n}$ sections, each with $n^{(k-1)/k}$ rungs. We perform $\Theta(\sqrt[k]{n})$ drops on the boundaries of these sections, then perform our strategy for $k-1$ phones on the previous section with $n^{(k-1)/k}$ rungs. Then our recurrence is
+
+\[P(n,k)=\begin{cases}
+n&\text{if $k=1$ or $n\leq 2$,}\\
+P(n^{(k-1)/k},k-1) + \Theta(\sqrt[k]{n})&\text{if $n>2$ and $k> 1$,}
+\end{cases}\]
+which just has one base case.
+\end{enumerate}
+
+{\bf Challenge:} Solve this recurrence without using induction.
+
+\end{enumerate}
+
+\end{document}
