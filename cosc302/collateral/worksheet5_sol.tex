@@ -1,0 +1,216 @@
+\documentclass[letterpaper,11pt]{article}
+
+\newif\ifSolutions
+%\Solutionsfalse
+\Solutionstrue
+
+
+\usepackage[margin=1.0in]{geometry}
+
+%\usepackage{amsmath}
+\usepackage{mathtools}
+\usepackage{amsthm}
+\usepackage{amsfonts}
+\usepackage{url}
+\usepackage{mathdots}
+
+%\newtheorem{theorem}{Theorem}[section]
+\newtheorem*{invariant*}{Invariant}
+
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\lhead{COSC 302 Lecture --- {\bf Worksheet 5 --- Heaps and Non-Comparison Sorting} --- Spring 2018}
+\rhead{}
+
+\usepackage[noend]{algpseudocode}
+\usepackage{algorithm}
+
+\algrenewcommand\algorithmicdo{}
+\algrenewcommand{\algorithmiccomment}[1]{// #1}
+
+\newcommand{\midd}{\ensuremath{\mathrm{mid}}}
+\newcommand{\E}{\ensuremath{\mathrm{E}}}
+\newcommand{\Prob}{\ensuremath{\mathrm{Pr}}}
+\newcommand{\argmin}{\ensuremath{\mathrm{arg\,min}}}
+\newcommand{\argmax}{\ensuremath{\mathrm{arg\,max}}}
+
+\begin{document}
+\thispagestyle{plain}
+\noindent{COSC 302: Analysis of Algorithms Lecture --- Spring 2018}
+
+\noindent{Prof. Darren Strash}
+
+\noindent{Colgate University} \\
+
+\noindent{\bf Worksheet 5 --- Heaps and Non-Comparison Sorting} \\
+
+\begin{enumerate}
+\item Iterated functions and the tower of twos.\\
+
+\textbf{Problem:} Let $2\uparrow\uparrow i$ denote the \emph{tower of twos}:
+\[\underbrace{2^{2^{2^{\iddots^2}}}}_{i \text{ times}}.\] Write the tower of twos as an iterated function.
+
+\textbf{Solution \#1:} As a first try, let's make a recursive function:
+
+\[P(i) = \begin{cases}2^{P(i-1)} &i > 1,\\ 2& i=1.\end{cases}\]
+
+However, this is not an iterated function per se. So instead, let's give a function that gives us the result when iterated.
+
+\textbf{Solution \#2:} Define our function to be $f(n) = 2^n$. Then following the framework of iterated functions, we get 
+\[f^{(i)}(n) = \begin{cases}f^{(i-1)}(f(n))&i > 0,\\n&i = 0,\end{cases}\]
+
+which solves to $\underbrace{2^{2^{2^{\iddots^{2^n\hspace{-7pt}}}}}}_{i \text{ times}}$\hspace{3pt}. Thus, for $n=1$, $f^{(i)}(n)$ is the tower of twos.
+
+\item Let $A[1..n]$ store a heap of $n$ distinct elements, and suppose we execute \textsc{HeapSort}($A$). Show that if, at the end of each call to \emph{Max-Heapify}$(A,1$), $A[$heap-size$(A)]$ always remains the minimum element in $A$, then \textsc{HeapSort}($A$) requires $\Omega(n\lg n)$ time. Use the following template for guidance.
+
+\begin{enumerate}
+\item One way to prove this result is to focus on a single operation, and show that this operation occurs $\Omega(n\lg n)$ times. For this problem, the number of \emph{swaps} made by the algorithm is a useful operation to bound. Explain why.\\
+
+{\bf Solution:} The number of swaps is equivalent to the number of times \textsc{Max-Heapify} is called. This seems to be the most expensive operation. We call it $n$ times, so if a constant fraction of these calls make $\Omega(\lg n)$ swaps, then we have shown the result!\\
+
+\item Where is the minimum value element in a \textsc{Max-Heap}? What about in the \textsc{Max-Heap} with our extra constraint?\\
+
+{\bf Solution:} The minimum element in a \textsc{Max-Heap} of distinct elements is a leaf. Otherwise it would have a child with larger value and the max-heap property would be violated. With our extra constraint, it is the last leaf: the rightmost node on the bottommost level.\\
+
+\item Call all the nodes on the path from a node $v$ to the root of the heap $v$'s \emph{ancestors}. Describe the how the values of $v$'s ancestors relate compare to each other and to $v$. How many ancestors does the minimum value have in our constrained \textsc{Max-Heap}? How many ancestors does the value have after calling \textsc{Extract-Max}($A$)?\\
+
+{\bf Solution:} Let an ancestor with height $h$ be called $v_h$. Then by the max-heap property $v_h > v_{h-1}$. Our minimum value has $\lfloor \lg n \rfloor$ ancestors, since it is on the bottommost level and $\lfloor \lg n \rfloor$ is the height of a max-heap. After calling \textsc{Extract-Max}($A$), then the minimum value either still has $\lfloor \lg n \rfloor$ ancestors (if the level does not become empty) or else $\lfloor \lg n \rfloor -1$ if the number of levels decreased by one.\\
+
+\item How many calls are made to \textsc{Max-Heapify} during a call to \textsc{Extract-Max}($A$) for the general \textsc{Max-Heap}? What about for our constrained version? What is the minimum number of calls? The maximum number? \emph{The minimum number is what we need to compute a lower bound for this case.} How many swaps are done?\\
+
+{\bf Solution:} \textsc{Max-Heapify} is called $O(\lg n)$ times during a call to \textsc{Extract-Max}($A$). However, it is possible that it will make only one call, and therefore is only $\Omega(1)$. For our constrained version, the same upper bound $O(\lg n)$ holds. However, the element must be moved to the bottommost level, which is at least $\lfloor \lg n \rfloor -1 = \Omega(\lg n)$ calls to \textsc{Max-Heapify}. The number of swaps equals the number of calls to \textsc{Max-Heapify}.\\
+
+%\vfill{}
+%\hfill{}Continued on next page $\rightarrow$
+%\newpage
+
+\item Now compute the total number of swaps performed by \textsc{HeapSort}($A$) and use it to show that \textsc{HeapSort}($A$) takes $\Omega(n\lg n)$ time in this case.\\
+
+{\bf Solution:} During the course of the \textsc{HeapSort} algorithm, the minimum element will be in index $n$, $n-1$, \ldots, $\lfloor n/2\rfloor$ (the parent of $n$) of $A$, among others. For each one of these indices, \textsc{Extract-Max} calls \textsc{Max-Heapify} at least $\lfloor \lg n\rfloor-2$ times. (When swapping $A[\lfloor n/2\rfloor]$ and $A[1]$, removing $A[n/2]$ could empty level $\lfloor\lg n\rfloor - 1$. And then $\lfloor\lg n\rfloor - 2$ swaps would be performed.) Thus, at least
+\[(n - \lfloor n/2\rfloor + 1)(\lfloor\lg n \rfloor -2) = \Omega(n\lg n)\]
+swaps are performed. Since the algorithm performs this many swap operations, the entire algorithm uses $\Omega(n\lg n)$ operations.
+
+\end{enumerate}
+
+\newpage
+
+\item  Suppose there is an operation called
+\textsc{SqrtSort}$(k)$, which sorts the subarray $A[k + 1..k + \sqrt{n}]$
+in place, given an arbitrary
+integer $k$ between $0$ and $n - \sqrt{n}$ as input. (To simplify the problem, assume that $\sqrt{n}$
+is an integer.)\footnote{Parts of this problem are taken from Jeff Erickson's \emph{Algorithms and Models of Computation} (\url{http://www.cs.illinois.edu/~jeffe/teaching/algorithms}); Chapter 1: Recursion.}
+
+\begin{enumerate}
+\item Describe an algorithm that sorts an input array $A[1..n]$. Your algorithm is only allowed to inspect or modify the input array
+by calling \textsc{SqrtSort}; in particular, your algorithm must not directly compare, move,
+or copy array elements.  How many times does your algorithm call \textsc{SqrtSort} in the worst case?
+\item Prove that your algorithm is correct; that is, it sorts the input $A[1..n]$.\\
+
+{\bf Inefficient Solution:} If iteratively we call \textsc{SqrtSort}($k$) for $k =0,1,2,\ldots, n-\sqrt{n}$, we move at least one element into correct position at the end. We can see this by the following invariant.
+
+{\bf Invariant:} Before calling \textsc{SqrtSort}($k$), $A[k+\sqrt{n}-1]$ contains the maximum element in $A[1..k+\sqrt{n}-1]$. To briefly justify: when we call \textsc{SqrtSort}($k$), it moves the maximum element in $A[k+1..k+\sqrt{n}]$ to $A[k+\sqrt{n}]$, which since, $k+1\sqrt{n}-1\in \{k,\ldots,k+\sqrt{n}\}$is the maximum of $A[k+1\sqrt{n}-1]$ (max in $A[1..k+\sqrt{n}-1]$), and $A[k+1..k+\sqrt{n}]$, which is the maximum in $A[1..k+\sqrt{n}]$.
+
+We can therefore run \textsc{SqrtSort} this way $n$ times, which moves all elements into correct position.
+
+\begin{algorithm}[!htb]
+\caption{A simple sorting algorithm with \textsc{SqrtSort}.}
+{\bf proc} \textsc{Simple-SqrtSort}($A[1..n]$)
+\begin{algorithmic}[1]
+\For{$i \leftarrow 1$ {\bf to} $n$}
+\For{$k \leftarrow 0$ {\bf to} $n-\sqrt{n}$}
+\State    \textsc{SqrtSort($k$)}
+\EndFor
+\EndFor
+\end{algorithmic}
+\label{algorithm:simple-sqrtsort}
+\end{algorithm}
+
+This takes $n(n-\sqrt{n}+1)$ calls to \textsc{SqrtSort} in the worst case.\\
+
+%\vspace*{0.7cm}
+
+{\bf More Efficient Solution:} We iteratively call \textsc{SqrtSort}($k$) for $k =0,\sqrt{n}/2,\sqrt{n},\ldots, n-\sqrt{n}$. This moves $\sqrt{n}/2$ elements into correct position.\\
+
+{\bf Invariant:} Before calling \textsc{SqrtSort}($k$), $A[k+1..k+\sqrt{n}/2]$ contains the $\sqrt{n}/2$ largest elements in $A[1..k+\sqrt{n}/2]$. To briefly justify, when we call \textsc{SqrtSort}($k$), it moves the largest $\sqrt{n}/2$ elements in $A[k+1..k+\sqrt{n}]$ to $A[k+\sqrt{n}/2+1..k+\sqrt{n}]$, which includes the largest $\sqrt{n}/2$ elements from $A[1..k+\sqrt{n}/2]$.\\
+
+\vfill{}
+\hfill{}See next page for analysis $\rightarrow$
+
+\newpage
+
+Since the ranges overlap by $\sqrt{n}/2$ elements, we call \textsc{SqrtSort} at most $\frac{n}{\sqrt{n}/2}-1 = 2\sqrt{n}-1$ times. We then repeat this for $k =0,\sqrt{n}/2,\sqrt{n},\ldots, n-\sqrt{n}-\sqrt{n}/2$ and continue this pattern, as illustrated with the following pseudocode.\\
+
+\begin{algorithm}[!htb]
+\caption{A more efficient algorithm with \textsc{SqrtSort}.}
+{\bf proc} \textsc{Efficient-SqrtSort}($A[1..n]$)
+\begin{algorithmic}[1]
+\For{$i \leftarrow 0$ {\bf to} $2\sqrt{n}-1$}
+\For{$k \leftarrow 0$ {\bf to} $2\sqrt{n}-(i+1)$}
+\State    \textsc{SqrtSort}($\sqrt{n}/2k$)
+\EndFor
+\EndFor
+\end{algorithmic}
+\label{algorithm:better-sqrtsort}
+\end{algorithm}
+
+In this algorithm, \textsc{SqrtSort} is called
+\[\sum_{i=0}^{2\sqrt{n}-1}\,\,\,\,\sum_{j=0}^{2\sqrt{n}-i-1}1 = \sum_{i=0}^{2\sqrt{n}-1}(2\sqrt{n}-i) = \Theta(n)\]
+times. Or, more precisely:
+\begin{align*}
+\sum_{i=0}^{2\sqrt{n}-1}\,\,\,\,\sum_{j=0}^{2\sqrt{n}-i-1}1 &= \sum_{i=0}^{2\sqrt{n}-1}(2\sqrt{n}-i)\\
+&= \sum_{i=0}^{2\sqrt{n}-1}2\sqrt{n}-\sum_{i=0}^{2\sqrt{n}-1}i\\
+&= 2\sqrt{n}(2\sqrt{n})-\frac{2\sqrt{n}(2\sqrt{n}-1)}{2}\\
+& = 2\sqrt{n}(2\sqrt{n}) - \sqrt{n}(2\sqrt{n}-1)\\
+&= 4n - 2n + \sqrt{n}\\
+&= 2n + \sqrt{n}
+\end{align*}
+times.
+
+\end{enumerate}
+
+\newpage
+
+\item Can the value $2^n$ be represented in the RAM model? Describe your answer.\\
+\emph{(to be discussed in a future recitation)}
+\vspace*{4cm}
+
+\item Suppose you are given an array $A[1..n]$ of integers between $0$ and $n^2-1$. Describe how to sort $A$ in $\Theta(n)$ time.\\
+\emph{(to be discussed in a future recitation)}
+\vspace*{4cm}
+
+\item It is generally not reasonable to expect to sort non-integers with \textsc{Radix-Sort}. Explain why.\\
+\emph{(to be discussed in a future recitation)}
+\vspace*{4cm}
+
+\item Of the comparison sorts that we've learned, which ones are stable? Choose a non-stable comparison sort. Propose a change to make it stable without changing its asymptotic running time.\\
+\emph{(to be discussed in a future recitation)}
+\vspace*{4cm}
+\newpage
+
+\item Suppose we don't use a stable sort to sort by keys in \textsc{Radix-Sort}. Give an example input with 2 values, where \textsc{Radix-Sort} fails to sort the input.\\
+\emph{(to be discussed in a future recitation)}
+\vspace*{6cm}
+
+\item In \textsc{Radix-Sort}, suppose we no longer sort values from the least- to most-significant keys, but now sort from most- to least-significant. Give an example with 2 values where \textsc{Radix-Sort} fails to sort the input.\\
+\emph{(to be discussed in a future recitation)}
+\vspace*{6cm}
+
+\item Describe how to modify \textsc{Counting-Sort} to actually sort items with keys not equal to their values.\\
+\emph{(to be discussed in a future recitation)}
+\vspace*{4cm}
+
+\newpage
+
+\item Describe how to modify \textsc{Bucket-Sort} to have worst-case $\Theta(n\lg n)$ time.\\
+\emph{(to be discussed in a future recitation)}
+\vspace*{6cm}
+
+\item Let $a,b\in \mathbb{R}$. Describe how to modify \textsc{Bucket-Sort} to sort elements drawn from $[a,b)$ uniformly at random.\\
+\emph{(to be discussed in a future recitation)}
+\vspace*{4cm}
+
+
+
+\end{enumerate}
+\end{document}
+
