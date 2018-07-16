@@ -1,7 +1,1 @@
-{
-"version": 3,
-"mappings": ";;;;;;AAaC;;;;;;;;;;;;OAYQ;EACP,QAAQ,EAAE,QAAQ;EAClB,YAAY,EAAE,2BAA2B;;;AAK1C;;;MAGO;EACN,WAAW,ECmHJ,MAAmB;;ADhH3B;mBACoB;EC+gBV,eAAsB,EAAE,MAA+C;EAAvE,kBAAsB,EAAE,MAA+C;EAAvE,cAAsB,EAAE,MAA+C;EAAvE,UAAsB,EAAE,MAA+C;ED5gBhF;6BAAU;IACT,OAAO,EAAE,WAAW;IAEpB;sCAAS;MACR,OAAO,EAAE,IAAI;;;AAWf;;;WAAM;EACL,MAAM,EAAE,iBAA2C",
-"sources": ["../sass/ie8.scss","../sass/libs/_skel.scss"],
-"names": [],
-"file": "ie8.css"
-}
+{"version":3,"sourceRoot":"","sources":["../sass/ie8.scss","../sass/libs/_skel.scss"],"names":[],"mappings":"AAKA;AAAA;AAAA;AAAA;AAAA;AAMA;AAEC;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;EAaC;EACA;;;AAGF;AAEC;AAAA;AAAA;AAAA;EAIC;;;AAGD;AAAA;ECghBU;EAAA;EAAA;EAAA;;AD5gBT;AAAA;EACC;;AAEA;AAAA;EACC;;;AAKJ;AAME;AAAA;AAAA;AAAA;EACC","file":"ie8.css"}
